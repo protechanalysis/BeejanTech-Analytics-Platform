@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-    # Configure AWS credentials
+    # Configure AWS credential
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
