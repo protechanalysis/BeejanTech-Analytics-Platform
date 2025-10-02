@@ -1,0 +1,4 @@
+awswrangler==3.8.1
+awscli==1.29.62
+faker==18.13.0
+pandera[pandas]==0.26.1

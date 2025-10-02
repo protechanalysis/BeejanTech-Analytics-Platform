@@ -1,0 +1,12 @@
+vough/
+terraform/.terraform/*
+terraform/.terraform.lock.hcl
+terraform/tf.plan
+orchestration/config/*
+__pycache__/
+**/*.pyc
+logs/
+.env
+note
+thought.md
+terraform/tf.plan
