@@ -1,0 +1,5 @@
+name                = "cloud-platform-analytics"
+bucket              = "cloud-platform"
+region              = "us-east-1"
+allowed_cidr_blocks = "0.0.0.0/0"
+keypair             = "ec2_test_key"
