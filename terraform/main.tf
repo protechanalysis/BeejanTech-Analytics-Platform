@@ -23,15 +23,15 @@ module "airflow_storage" {
 }
 
 module "bootstrap_scripts_upload" {
-  source = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/s3_upload?ref=v1.4.5"
-  bucket = module.airflow_storage.cloud_beejan_bucket_name
+  source     = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/s3_upload?ref=v1.4.5"
+  bucket     = module.airflow_storage.cloud_beejan_bucket_name
   source_dir = "../bootstrap_scripts"
-  prefix = "bootstrap_scripts/"
+  prefix     = "bootstrap_scripts/"
 }
 
 module "upload_airflow_files" {
-  source = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/s3_upload?ref=v1.4.5"
-  bucket = module.airflow_storage.cloud_beejan_bucket_name
+  source     = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/s3_upload?ref=v1.4.5"
+  bucket     = module.airflow_storage.cloud_beejan_bucket_name
   source_dir = "../orchestration"
 }
 
