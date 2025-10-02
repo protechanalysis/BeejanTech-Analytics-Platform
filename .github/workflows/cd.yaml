@@ -2,7 +2,7 @@ name: CD_Terraform_Deployment
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: main
 jobs:
   terraform-plan:
     runs-on: ubuntu-latest
