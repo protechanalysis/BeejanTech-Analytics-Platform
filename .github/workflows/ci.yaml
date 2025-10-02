@@ -1,0 +1,81 @@
+name: CI for Terraform validation with plan and Dag test
+
+on:
+  push:
+    branches-ignore:
+      - main    # don't run CI on direct pushes to main
+    paths:
+      - 'terraform/**/*'
+      - 'orchestration/dags/**/*'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'terraform/**/*'
+      - 'orchestration/dags/**/*'
+
+jobs:
+  terraform-checks:
+    name: Terraform Init, Validate, Lint & Plan
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.4"
+
+      - name: Install tflint
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+
+      - name: Terraform Init
+        run: terraform init -input=false
+        working-directory: ./terraform
+
+      - name: Terraform fmt
+        run: terraform fmt -recursive -check
+        working-directory: ./terraform
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ./terraform
+
+      - name: Terraform Lint (tflint)
+        run: tflint --recursive ./terraform
+
+      - name: Terraform Plan (dry-run)
+        run: terraform plan -input=false -out=tfplan
+        working-directory: ./terraform
+
+      - name: Upload plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: ./terraform/tfplan
+
+  dag-tests:
+    name: Airflow DAG Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Airflow
+        run: |
+          pip install apache-airflow==2.9.2 \
+          --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.9.2/constraints-3.9.txt
+          pip install pytest
+
+      - name: Run DAG integrity tests
+        run: pytest orchestration/tests/
