@@ -23,7 +23,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.10.4"
+          terraform_version: "1.13.3"
 
       - name: Install tflint
         run: |
@@ -39,10 +39,11 @@ jobs:
 
       - name: Terraform Validate
         run: terraform validate
-        working-directory: ./terraform
+        
 
       - name: Terraform Lint (tflint)
-        run: tflint --recursive ./terraform
+        run: tflint --recursive
+        working-directory: ./terraform
 
       - name: Terraform Plan (dry-run)
         run: terraform plan -input=false -out=tfplan
@@ -57,6 +58,7 @@ jobs:
   dag-tests:
     name: Airflow DAG Validation
     runs-on: ubuntu-latest
+    needs: terraform-checks
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
