@@ -4,8 +4,6 @@ on:
   push:
     branches-ignore:
       - main  # don't run CI on direct pushes to main
-  pull_request:
-    branches: main
 
 jobs:
   terraform-checks:
