@@ -3,12 +3,12 @@ name: CI for Terraform validation with plan and Dag test
 on:
   push:
     branches-ignore:
-      - main    # don't run CI on direct pushes to main
+      - "main"   # don't run CI on direct pushes to main
     paths:
       - 'terraform/**/*'
       - 'orchestration/dags/**/*'
   pull_request:
-    branches: [ "main" ]
+    branches: "main"
     paths:
       - 'terraform/**/*'
       - 'orchestration/dags/**/*'
