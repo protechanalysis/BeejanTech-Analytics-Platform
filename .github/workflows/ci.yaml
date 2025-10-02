@@ -39,10 +39,11 @@ jobs:
 
       - name: Terraform Validate
         run: terraform validate
-        working-directory: ./terraform
+        
 
       - name: Terraform Lint (tflint)
-        run: tflint --recursive ./terraform
+        run: tflint --recursive
+        working-directory: ./terraform
 
       - name: Terraform Plan (dry-run)
         run: terraform plan -input=false -out=tfplan
