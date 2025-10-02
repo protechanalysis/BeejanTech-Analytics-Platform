@@ -3,12 +3,17 @@ name: CI for Terraform validation with plan and Dag test
 on:
   push:
     branches-ignore:
-      - "main"   # don't run CI on direct pushes to main
-  pull_request:
-    branches: "main"
+      - main   # don't run CI on direct pushes to main
     paths:
-      - 'terraform/**/*'
-      - 'orchestration/dags/**/*'
+      - 'terraform/**'           # Changed from terraform/**/*
+      - 'orchestration/dags/**'  # Changed from orchestration/dags/**/*
+      - '.github/workflows/**'   # Added - trigger on workflow changes
+  pull_request:
+    branches:
+      - main                     # Fixed - was a string, now an array
+    paths:
+      - 'terraform/**'
+      - 'orchestration/dags/**'
 
 jobs:
   terraform-checks:
@@ -72,8 +77,10 @@ jobs:
       - name: Install Airflow
         run: |
           pip install apache-airflow==2.9.2 \
-          --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.9.2/constraints-3.9.txt
-          pip install pytest
+          --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.9.2/constraints-3.11.txt
+
+      - name: Install pytest
+        run: pip install pytest
 
       - name: Run DAG integrity tests
         run: pytest orchestration/tests/
