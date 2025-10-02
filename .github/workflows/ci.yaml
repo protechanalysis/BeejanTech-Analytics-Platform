@@ -4,6 +4,7 @@ on:
   push:
     branches-ignore:
       - main  # don't run CI on direct pushes to main
+
 jobs:
   terraform-checks:
     name: Terraform Init, Validate, Lint & Plan
@@ -36,8 +37,8 @@ jobs:
 
       - name: Terraform Validate
         run: terraform validate
+        working-directory: ./terraform
         
-
       - name: Terraform Lint (tflint)
         run: tflint --recursive
         working-directory: ./terraform
