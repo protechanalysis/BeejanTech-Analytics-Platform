@@ -47,12 +47,6 @@ jobs:
         run: terraform plan -input=false -out=tfplan
         working-directory: ./terraform
 
-      - name: Upload plan artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan
-          path: ./terraform/tfplan
-
   dag-tests:
     name: Airflow DAG Validation
     runs-on: ubuntu-latest

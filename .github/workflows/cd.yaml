@@ -20,16 +20,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Cache Terraform plugins files
-      - name: Cache Terraform
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.terraform.d/plugin-cache
-          key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/**/*.tf') }}
-          restore-keys: |
-            ${{ runner.os }}-terraform-
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -47,12 +37,6 @@ jobs:
         run: terraform plan -input=false -out=tfplan
         working-directory: ./terraform
 
-      - name: Upload plan artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan
-          path: ./terraform/tfplan
-
   terraform-apply:
     needs: terraform-plan
     runs-on: ubuntu-latest
@@ -69,20 +53,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Cache Terraform
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.terraform.d/plugin-cache
-          key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/**/*.tf') }}
-          restore-keys: |
-            ${{ runner.os }}-terraform-
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.13.3"
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -95,12 +65,17 @@ jobs:
         run: python secret.py
         continue-on-error: false
 
-      - name: Download plan artifact
-        uses: actions/download-artifact@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
         with:
-          name: tfplan
-          path: ./terraform
+          terraform_version: "1.13.3"
+
+      - name: Terraform Init
+        run: terraform init -input=false
+        working-directory: ./terraform
 
       - name: Terraform Apply
         run: terraform apply -input=false -auto-approve ./tfplan
         working-directory: ./terraform
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        continue-on-error: false
