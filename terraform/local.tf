@@ -46,8 +46,8 @@ locals {
   #   ]
   # ])
 
-  bucket              = var.bucket
-  name                = var.name
+  bucket = var.bucket
+  name   = var.name
   # region              = var.region
   # allowed_cidr_blocks = var.allowed_cidr_blocks
   # key_name            = var.keypair
@@ -59,27 +59,27 @@ locals {
     Application = local.name
   }
 
-#   # general tags
-#   tags = merge(local.common_tags, {
-#   })
-#   # Tags for specific resources
-#   vpc_tags = merge(local.common_tags, {
-#     Name = "${local.name}-vpc"
-#     Type = "Network"
-#   })
+  #   # general tags
+  #   tags = merge(local.common_tags, {
+  #   })
+  #   # Tags for specific resources
+  #   vpc_tags = merge(local.common_tags, {
+  #     Name = "${local.name}-vpc"
+  #     Type = "Network"
+  #   })
 
-#   subnet_tags = merge(local.common_tags, {
-#     Type = "Subnet"
-#   })
+  #   subnet_tags = merge(local.common_tags, {
+  #     Type = "Subnet"
+  #   })
 
-#   ec2_tags = merge(local.common_tags, {
-#     Type   = "Compute"
-#     Backup = "false"
-#   })
+  #   ec2_tags = merge(local.common_tags, {
+  #     Type   = "Compute"
+  #     Backup = "false"
+  #   })
 
-#   rds_tags = merge(local.common_tags, {
-#     Type = "Database"
-#   })
+  #   rds_tags = merge(local.common_tags, {
+  #     Type = "Database"
+  #   })
 
   s3_tags = merge(local.common_tags, {
     Type = "Storage"
