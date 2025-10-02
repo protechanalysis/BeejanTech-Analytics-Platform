@@ -46,18 +46,18 @@ locals {
   #   ]
   # ])
 
-  bucket = var.bucket
-  name   = var.name
-  # region              = var.region
-  # allowed_cidr_blocks = var.allowed_cidr_blocks
-  # key_name            = var.keypair
+  # bucket = var.bucket
+  # name   = var.name
+  # # region              = var.region
+  # # allowed_cidr_blocks = var.allowed_cidr_blocks
+  # # key_name            = var.keypair
 
-  # Common tags to be applied to all resources
-  common_tags = {
-    Environment = var.environment
-    # Project     = var.project_name
-    Application = local.name
-  }
+  # # Common tags to be applied to all resources
+  # common_tags = {
+  #   Environment = var.environment
+  #   # Project     = var.project_name
+  #   Application = local.name
+  # }
 
   #   # general tags
   #   tags = merge(local.common_tags, {
@@ -81,7 +81,7 @@ locals {
   #     Type = "Database"
   #   })
 
-  s3_tags = merge(local.common_tags, {
-    Type = "Storage"
-  })
+  # s3_tags = merge(local.common_tags, {
+  #   Type = "Storage"
+  # })
 }
