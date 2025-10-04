@@ -60,8 +60,8 @@ locals {
   }
 
   # general tags
-  tags = merge(local.common_tags, {
-  })
+  # tags = merge(local.common_tags, {
+  # })
   # Tags for specific resources
   vpc_tags = merge(local.common_tags, {
     Name = "${local.name}-vpc"
