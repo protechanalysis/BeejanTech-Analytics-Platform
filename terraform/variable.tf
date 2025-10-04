@@ -6,7 +6,7 @@ variable "bucket" {
 variable "name" {
   type        = string
   description = "Name of the environment"
-}
+} 
 
 # variable "region" {
 #   type        = string
@@ -17,6 +17,16 @@ variable "name" {
 #   type        = string
 #   description = "Name of the SSH key pair to use for EC2 instances"
 # }
+
+# variable "region" {
+#   type        = string
+#   description = "AWS region where resources will be created"
+# }
+
+variable "keypair" {
+  type        = string
+  description = "Name of the SSH key pair to use for EC2 instances"
+}
 
 variable "allowed_cidr_blocks" {
   type        = string
