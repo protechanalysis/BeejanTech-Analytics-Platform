@@ -29,18 +29,12 @@ module "bootstrap_scripts_upload" {
   prefix     = "bootstrap_scripts/"
 }
 
-module "upload_airflow_files" {
-  source     = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/s3_upload?ref=v1.4.5"
-  bucket     = module.airflow_storage.cloud_beejan_bucket_name
-  source_dir = "../orchestration"
-}
-
 module "vpc" {
   source          = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/vpc?ref=v1.2.5"
   name            = "${local.name}-vpc"
   cidr_block      = "10.0.0.0/16"
   log_destination = module.object_storage.vpc_flow_logs_bucket_arn
-  depends_on      = [module.object_storage, module.etl_storage,module.bootstrap_scripts_upload]
+  depends_on      = [module.object_storage, module.etl_storage, module.bootstrap_scripts_upload]
   tags            = local.vpc_tags
 }
 
@@ -291,13 +285,13 @@ module "ec2_instance_1" {
 # }
 
 module "load_balancer" {
-  source            = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/load_balancer/application/?ref=v1.3.4"
-  vpc_id            = module.vpc.vpc_id
-  name              = "${local.name}-alb"
-  alb_sg_id         = [module.alb_security_group.security_group_id]
-  subnet_ids        = [module.public_subnet.subnet_ids["public-1-b"], module.public_subnet.subnet_ids["public-2-b"]]
-  instance_ids      = { "instance_0" = module.ec2_instance_1.instance_id }
-#   , "instance_1" = module.ec2_instance_2.instance_id }
+  source       = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/load_balancer/application/?ref=v1.3.4"
+  vpc_id       = module.vpc.vpc_id
+  name         = "${local.name}-alb"
+  alb_sg_id    = [module.alb_security_group.security_group_id]
+  subnet_ids   = [module.public_subnet.subnet_ids["public-1-b"], module.public_subnet.subnet_ids["public-2-b"]]
+  instance_ids = { "instance_0" = module.ec2_instance_1.instance_id }
+  #   , "instance_1" = module.ec2_instance_2.instance_id }
   enable_stickiness = true
   cookie_duration   = 1800
   health_check_path = "/api/v2/version"
@@ -373,8 +367,8 @@ module "redshift" {
   cluster_security_groups = [module.redshift_security_group.security_group_id]
   iam_role_redshift_arn   = [module.redshift_role.redshift_s3_role_arn]
   subnet_ids              = [module.private_subnet.subnet_ids["private-1-b"], module.private_subnet.subnet_ids["private-2-b"]]
-                            # , module.private_subnet.subnet_ids["private-3-b"]]
-  depends_on              = [module.redshift_role, module.redshift_security_group]
+  # , module.private_subnet.subnet_ids["private-3-b"]]
+  depends_on = [module.redshift_role, module.redshift_security_group]
   tags = merge(local.common_tags, {
     Name = "${local.name}-redshift-cluster"
     Type = "RedshiftCluster"

@@ -37,7 +37,7 @@ jobs:
         working-directory: ./terraform
 
       - name: Terraform Plan
-        run: terraform plan -input=false -out=tfplan
+        run: terraform plan -input=false
         working-directory: ./terraform
 
   terraform-apply:
@@ -86,3 +86,21 @@ jobs:
         working-directory: ./terraform
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         continue-on-error: false
+
+  Upload-to-S3:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'    
+    needs: terraform-apply
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Upload dags to S3
+        run: |
+          aws s3 sync orchestration/dags/ s3://builditall-airflow/dags/
+    

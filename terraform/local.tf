@@ -46,8 +46,8 @@ locals {
     ]
   ])
 
-  bucket              = var.bucket
-  name                = var.name
+  bucket = var.bucket
+  name   = var.name
   # region              = var.region
   allowed_cidr_blocks = var.allowed_cidr_blocks
   key_name            = var.keypair
