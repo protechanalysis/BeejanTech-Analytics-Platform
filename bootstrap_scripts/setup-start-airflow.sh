@@ -3,13 +3,13 @@
 cd /home/ubuntu/airflow
 
 # Download entrypoint script from S3
-aws s3 sync s3://cloud-platform-airflow/bootstrap_scripts/entrypoint.sh /home/ubuntu/airflow/entrypoint.sh
+aws s3 cp s3://cloud-platform-airflow/bootstrap_scripts/entrypoint.sh /home/ubuntu/airflow/entrypoint.sh
 
 # Download the Docker Compose file from S3
-aws s3 sync s3://cloud-platform-airflow/docker-compose.yaml /home/ubuntu/airflow/docker-compose.yaml
+aws s3 cp s3://cloud-platform-airflow/docker-compose.yaml /home/ubuntu/airflow/docker-compose.yaml
 
 # Download the Docker Compose file from S3
-aws s3 sync s3://cloud-platform-airflow/Dockerfile /home/ubuntu/airflow/Dockerfile
+aws s3 cp s3://cloud-platform-airflow/Dockerfile /home/ubuntu/airflow/Dockerfile
 
 
 # Set the Airflow UID

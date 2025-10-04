@@ -50,7 +50,7 @@ locals {
   name   = var.name
   # region              = var.region
   allowed_cidr_blocks = var.allowed_cidr_blocks
-  key_name            = var.keypair
+  # key_name            = var.keypair
 
   # Common tags to be applied to all resources
   common_tags = {
@@ -72,14 +72,14 @@ locals {
     Type = "Subnet"
   })
 
-  ec2_tags = merge(local.common_tags, {
-    Type   = "Compute"
-    Backup = "false"
-  })
+  # ec2_tags = merge(local.common_tags, {
+  #   Type   = "Compute"
+  #   Backup = "false"
+  # })
 
-  rds_tags = merge(local.common_tags, {
-    Type = "Database"
-  })
+  # rds_tags = merge(local.common_tags, {
+  #   Type = "Database"
+  # })
 
   s3_tags = merge(local.common_tags, {
     Type = "Storage"
