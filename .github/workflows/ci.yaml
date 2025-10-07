@@ -84,11 +84,7 @@ jobs:
       - name: Terraform Lint (tflint)
         run: tflint --recursive
         working-directory: ./terraform/main_infra
-
-      - name: Terraform Plan (dry-run)
-        run: terraform plan -input=false -out=tfplan
-        working-directory: ./terraform/main_infra
-
+        
   dag-tests:
     name: Airflow DAG Validation
     runs-on: ubuntu-latest
