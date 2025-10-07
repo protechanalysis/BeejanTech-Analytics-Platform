@@ -67,7 +67,7 @@ jobs:
 
       - name: Upload bootstraps folder to S3
         run: |
-          aws s3 sync bootstraps/ s3://cloud-platform-airflow/
+          aws s3 sync bootstrap_scripts/ s3://cloud-platform-airflow/bootstrap_scripts
         continue-on-error: false
       
       - name: Upload orchestration folder to S3
