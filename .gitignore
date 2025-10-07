@@ -1,12 +1,8 @@
 vough/
-<<<<<<< HEAD
 **/.terraform/
 **/.terraform.lock.hcl
-=======
-terraform/.terraform/*
-terraform/.terraform.lock.hcl
-terraform/tf.plan
->>>>>>> origin/main
+**/.terraform/
+**/.terraform.lock.hcl
 orchestration/config/*
 __pycache__/
 **/*.pyc
@@ -14,7 +10,3 @@ logs/
 .env
 note
 thought.md
-<<<<<<< HEAD
-=======
-terraform/tf.plan
->>>>>>> origin/main
