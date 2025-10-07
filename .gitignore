@@ -1,6 +1,8 @@
 vough/
 **/.terraform/
 **/.terraform.lock.hcl
+**/.terraform/
+**/.terraform.lock.hcl
 orchestration/config/*
 __pycache__/
 **/*.pyc
