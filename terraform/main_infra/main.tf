@@ -18,15 +18,15 @@ module "vpc" {
   tags            = local.vpc_tags
 }
 
-# module "public_subnet" {
-#   source                  = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/subnets?ref=v1.2.5"
-#   vpc_id                  = module.vpc.vpc_id
-#   map_public_ip_on_launch = true
-#   subnets                 = local.public_subnets
-#   tags = merge(local.subnet_tags, {
-#     Tier = "Public"
-#   })
-# }
+module "public_subnet" {
+  source                  = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/subnets?ref=v1.2.5"
+  vpc_id                  = module.vpc.vpc_id
+  map_public_ip_on_launch = true
+  subnets                 = local.public_subnets
+  tags = merge(local.subnet_tags, {
+    Tier = "Public"
+  })
+}
 
 # module "private_subnet" {
 #   source                  = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/subnets?ref=v1.2.5"

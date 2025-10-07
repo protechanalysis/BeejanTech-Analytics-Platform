@@ -1,30 +1,30 @@
-# data "aws_availability_zones" "available" {
-#   state = "available"
-# }
+data "aws_availability_zones" "available" {
+  state = "available"
+}
 
 # Local values for more dynamic configuration
 locals {
-  # azs = slice(data.aws_availability_zones.available.names, 0, 3)
+  azs = slice(data.aws_availability_zones.available.names, 0, 3)
 
-  # public_subnets = flatten([
-  #   for i, az in local.azs : [
-  #     {
-  #       name = "public-${i + 1}-a"
-  #       cidr = "10.0.${i + 1}.0/24"
-  #       az   = az
-  #     },
-  #     {
-  #       name = "public-${i + 1}-b"
-  #       cidr = "10.0.${i + 10}.0/24"
-  #       az   = az
-  #     },
-  #     {
-  #       name = "public-${i + 1}-c"
-  #       cidr = "10.0.${i + 20}.0/24"
-  #       az   = az
-  #     }
-  #   ]
-  # ])
+  public_subnets = flatten([
+    for i, az in local.azs : [
+      {
+        name = "public-${i + 1}-a"
+        cidr = "10.0.${i + 1}.0/24"
+        az   = az
+      },
+      {
+        name = "public-${i + 1}-b"
+        cidr = "10.0.${i + 10}.0/24"
+        az   = az
+      },
+      {
+        name = "public-${i + 1}-c"
+        cidr = "10.0.${i + 20}.0/24"
+        az   = az
+      }
+    ]
+  ])
 
   # private_subnets = flatten([
   #   for i, az in local.azs : [
@@ -68,9 +68,9 @@ locals {
     Type = "Network"
   })
 
-  # subnet_tags = merge(local.common_tags, {
-  #   Type = "Subnet"
-  # })
+  subnet_tags = merge(local.common_tags, {
+    Type = "Subnet"
+  })
 
   # ec2_tags = merge(local.common_tags, {
   #   Type   = "Compute"
