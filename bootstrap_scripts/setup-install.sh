@@ -21,10 +21,13 @@ mkdir -p /home/ubuntu/airflow/dags /home/ubuntu/airflow/logs /home/ubuntu/airflo
 # Sync DAGs from S3 if they exist arn:aws:s3:::cloud-platform-airflow
 if aws s3 ls s3://cloud-platform-airflow/dags/ >/dev/null 2>&1; then
   aws s3 sync s3://cloud-platform-airflow/dags/ /home/ubuntu/airflow/dags/
+<<<<<<< HEAD
+=======
 else
   echo "# DAGs folder initialized" > /tmp/empty_dag_placeholder.txt
   aws s3 cp /tmp/empty_dag_placeholder.txt s3://cloud-platform-airflow/dags/.keep
   rm -f /tmp/empty_dag_placeholder.txt
+>>>>>>> origin/main
 fi
 
 # Copy requirements.txt from S3 if it exists

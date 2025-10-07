@@ -8,7 +8,7 @@ on:
       - 'terraform/**'
 
 jobs:
-  terraform-plan:
+  terraform-bucket-infra:
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -30,18 +30,54 @@ jobs:
 
       - name: Terraform Init
         run: terraform init -input=false
-        working-directory: ./terraform
+        working-directory: ./terraform/bucket_infra
+        continue-on-error: false
+
 
       - name: Terraform fmt
         run: terraform fmt -check -recursive
-        working-directory: ./terraform
+        working-directory: ./terraform/bucket_infra
 
       - name: Terraform Plan
-        run: terraform plan -input=false
-        working-directory: ./terraform
+        run: terraform plan -input=false -out=tfplan
+        working-directory: ./terraform/bucket_infra
+        continue-on-error: false
 
-  terraform-apply:
-    needs: terraform-plan
+      - name: Terraform Apply
+        run: terraform apply -input=false -auto-approve ./tfplan
+        working-directory: ./terraform/bucket_infra
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        continue-on-error: false
+
+  Upload-to-S3:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'    
+    needs: terraform-bucket-infra
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload bootstraps folder to S3
+        run: |
+          aws s3 sync bootstraps/ s3://cloud-platform-airflow/
+        continue-on-error: false
+      
+      - name: Upload orchestration folder to S3
+        run: |
+          aws s3 sync orchestration/ s3://cloud-platform-airflow/ --exclude "tests/*"
+        continue-on-error: false
+
+
+  terraform-main-apply:
+    needs: Upload-to-S3
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -75,32 +111,19 @@ jobs:
 
       - name: Terraform Init
         run: terraform init -input=false
-        working-directory: ./terraform
+        working-directory: ./terraform/main_infra
+        continue-on-error: false
+
 
       - name: Terraform Plan
         run: terraform plan -input=false -out=tfplan
-        working-directory: ./terraform
+        working-directory: ./terraform/main_infra
+        continue-on-error: false
 
       - name: Terraform Apply
         run: terraform apply -input=false -auto-approve ./tfplan
-        working-directory: ./terraform
+        working-directory: ./terraform/main_infra
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        continue-on-error: false
-
-  Upload-to-S3:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'    
-    needs: terraform-apply
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-      - name: Upload dags to S3
-        run: |
-          aws s3 sync orchestration/dags/ s3://builditall-airflow/dags/
+        
+  
     
