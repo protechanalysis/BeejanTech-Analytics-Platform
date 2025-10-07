@@ -6,7 +6,7 @@ on:
       - main  # don't run CI on direct pushes to main
 
 jobs:
-  terraform-bucket-checks:
+  terraform-bucket-infra-checks:
     name: Terraform Init, Validate, Lint & Plan
     runs-on: ubuntu-latest
     environment: dev
