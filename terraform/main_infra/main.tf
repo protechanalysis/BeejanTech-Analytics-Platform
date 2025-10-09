@@ -447,3 +447,14 @@ module "ssm_param" {
     }
   }
 }
+
+module "ssm_param_id" {
+  source = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/ssm_parameters/general_param?ref=v1.3.1"
+  parameters = {
+    instance_1_id = {
+      description = "ec2 instance id"
+      value       = module.ec2_instance_1.instance_id
+      type        = "String"
+    }
+  }
+}
