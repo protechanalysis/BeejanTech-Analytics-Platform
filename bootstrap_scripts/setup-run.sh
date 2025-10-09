@@ -28,3 +28,12 @@ echo "[$(date)] Running setup-start-airflow.sh..."
 /home/ubuntu/bootstrap_scripts/setup-start-airflow.sh
 
 echo "[$(date)] Airflow EC2 setup completed."
+
+INSTANCE_ID=$(ec2-metadata --instance-id | cut -d " " -f 2)
+TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+S3_LOG_PATH="s3://cloud-platform-airflow/logs/bootstrap/${INSTANCE_ID}/${TIMESTAMP}-airflow-setup.log"
+
+echo "[$(date)] Uploading log to S3: ${S3_LOG_PATH}"
+aws s3 cp "$LOG_FILE" "$S3_LOG_PATH"
+
+echo "[$(date)] Log uploaded successfully."

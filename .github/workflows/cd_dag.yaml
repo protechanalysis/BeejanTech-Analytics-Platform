@@ -32,11 +32,13 @@ jobs:
         run: |
           INSTANCE_ID=$(aws ssm get-parameter --name "instance_1_id" --query "Parameter.Value" --output text)
           echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
+          INSTANCE_2_ID=$(aws ssm get-parameter --name "instance_2_id" --query "Parameter.Value" --output text)
+          echo "INSTANCE_2_ID=$INSTANCE_2_ID" >> $GITHUB_ENV
 
       - name: Sync DAGs to EC2 via SSM
         run: |
           aws ssm send-command \
-            --instance-ids "$INSTANCE_ID" \
+            --instance-ids "$INSTANCE_ID,$INSTANCE_2_ID" \
             --document-name "AWS-RunShellScript" \
             --comment "Sync DAGs from S3 to EC2" \
             --parameters commands="aws s3 sync s3://cloud-platform-airflow/dags/ /home/ubuntu/airflow/dags/" \
