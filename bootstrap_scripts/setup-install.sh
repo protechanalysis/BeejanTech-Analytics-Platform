@@ -19,8 +19,11 @@ chmod +x /usr/local/bin/docker-compose
 mkdir -p /home/ubuntu/airflow/dags /home/ubuntu/airflow/logs /home/ubuntu/airflow/plugins /home/ubuntu/airflow/config
 
 # Sync DAGs from S3 if they exist arn:aws:s3:::cloud-platform-airflow
-aws s3 ls s3://cloud-platform-airflow/dags/ >/dev/null 2>&1; then
-aws s3 sync s3://cloud-platform-airflow/dags/ /home/ubuntu/airflow/dags/
+if aws s3 ls s3://cloud-platform-airflow/dags/ >/dev/null 2>&1; then
+    aws s3 sync s3://cloud-platform-airflow/dags/ /home/ubuntu/airflow/dags/
+else
+    echo "No DAGs found in s3://cloud-platform-airflow/dags/"
+fi
 
 # # Set permissions
 # chown -R ubuntu:ubuntu /home/ubuntu/airflow

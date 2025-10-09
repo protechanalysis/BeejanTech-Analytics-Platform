@@ -12,9 +12,11 @@ aws s3 cp s3://cloud-platform-airflow/docker-compose.yaml /home/ubuntu/airflow/d
 aws s3 cp s3://cloud-platform-airflow/Dockerfile /home/ubuntu/airflow/Dockerfile
 
 # Download the requirements.txt from S3
-aws s3 ls s3://cloud-platform-airflow/requirements.txt >/dev/null 2>&1; then
-aws s3 cp s3://cloud-platform-airflow/requirements.txt /home/ubuntu/airflow/requirements.txt
-
+if aws s3 ls s3://cloud-platform-airflow/requirements.txt >/dev/null 2>&1; then
+    aws s3 cp s3://cloud-platform-airflow/requirements.txt /home/ubuntu/airflow/requirements.txt
+else
+    echo "requirements.txt not found in S3"
+fi
 
 # Set the Airflow UID
 echo -e "AIRFLOW_UID=$(id -u)" > .env
