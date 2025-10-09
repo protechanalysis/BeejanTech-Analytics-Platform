@@ -248,30 +248,29 @@ module "ec2_instance_1" {
   })
 }
 
-# module "ec2_instance_2" {
-#   source                  = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/instance?ref=v1.2.5"
-#   instance_type           = "t3a.xlarge"
-#   vpc_id                  = module.vpc.vpc_id
-#   subnet_id               = module.private_subnet.subnet_ids["private-2-a"]
-#   instance_profile_name   = module.ec2_role.instance_profile_name
-#   key_pair                = local.key_name
-#   security_group_id       = [module.instance_security_group.security_group_id]
-#   ssh_allowed_cidr_blocks = [local.allowed_cidr_blocks]
-#   user_data               = file("../../bootstrap_scripts/setup-run.sh")
-#   depends_on              = [module.ssm_param]
-#   tags = merge(local.ec2_tags, {
-#     Name = "${local.name}-instance-2"
-#   })
-# }
+module "ec2_instance_2" {
+  source                  = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/instance?ref=v1.2.5"
+  instance_type           = "t3a.xlarge"
+  vpc_id                  = module.vpc.vpc_id
+  subnet_id               = module.private_subnet.subnet_ids["private-2-a"]
+  instance_profile_name   = module.ec2_role.instance_profile_name
+  key_pair                = local.key_name
+  security_group_id       = [module.instance_security_group.security_group_id]
+  ssh_allowed_cidr_blocks = [local.allowed_cidr_blocks]
+  user_data               = file("../../bootstrap_scripts/setup-run.sh")
+  depends_on              = [module.ssm_param]
+  tags = merge(local.ec2_tags, {
+    Name = "${local.name}-instance-2"
+  })
+}
 
 module "load_balancer" {
-  source       = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/load_balancer/application/?ref=v1.3.4"
-  vpc_id       = module.vpc.vpc_id
-  name         = "${local.name}-alb"
-  alb_sg_id    = [module.alb_security_group.security_group_id]
-  subnet_ids   = [module.public_subnet.subnet_ids["public-1-b"], module.public_subnet.subnet_ids["public-2-b"]]
-  instance_ids = { "instance_0" = module.ec2_instance_1.instance_id }
-  #  "instance_1" = module.ec2_instance_2.instance_id }
+  source            = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/load_balancer/application/?ref=v1.3.4"
+  vpc_id            = module.vpc.vpc_id
+  name              = "${local.name}-alb"
+  alb_sg_id         = [module.alb_security_group.security_group_id]
+  subnet_ids        = [module.public_subnet.subnet_ids["public-1-b"], module.public_subnet.subnet_ids["public-2-b"]]
+  instance_ids      = { "instance_0" = module.ec2_instance_1.instance_id, "instance_1" = module.ec2_instance_2.instance_id }
   enable_stickiness = true
   cookie_duration   = 1800
   health_check_path = "/api/v2/version"
