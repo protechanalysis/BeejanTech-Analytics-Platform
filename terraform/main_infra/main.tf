@@ -439,11 +439,6 @@ module "ssm_param" {
       description = " datawarehouse endpoint"
       value       = split(":", module.redshift.redshift_cluster_endpoint)[0]
       type        = "String"
-    },
-    instance_1_id = {
-      description = "ec2 instance id"
-      value       = module.ec2_instance_1.instance_id
-      type        = "String"
     }
   }
 }
