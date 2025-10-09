@@ -26,3 +26,18 @@ jobs:
       - name: Upload orchestration folder to S3
         run: |
           aws s3 sync orchestration/dags/ s3://cloud-platform-airflow/dags/
+
+      - name: Get EC2 instance ID from SSM Parameter
+        id: get_instance_id
+        run: |
+          INSTANCE_ID=$(aws ssm get-parameter --name "instance_1_id" --query "Parameter.Value" --output text)
+          echo "INSTANCE_ID=$INSTANCE_ID" >> $GITHUB_ENV
+
+      - name: Sync DAGs to EC2 via SSM
+        run: |
+          aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Sync DAGs from S3 to EC2" \
+            --parameters commands="aws s3 sync s3://cloud-platform-airflow/dags/ /home/ubuntu/airflow/dags/" \
+            --timeout-seconds 600

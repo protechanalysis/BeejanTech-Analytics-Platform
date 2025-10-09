@@ -15,6 +15,13 @@ usermod -a -G docker ubuntu
 curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 
+# Install and enable AWS SSM Agent
+echo "=== Installing Amazon SSM Agent ==="
+snap install amazon-ssm-agent --classic
+systemctl enable snap.amazon-ssm-agent.amazon-ssm-agent.service
+systemctl start snap.amazon-ssm-agent.amazon-ssm-agent.service
+systemctl status snap.amazon-ssm-agent.amazon-ssm-agent.service --no-pager
+
 # Create directories for Airflow
 mkdir -p /home/ubuntu/airflow/dags /home/ubuntu/airflow/logs /home/ubuntu/airflow/plugins /home/ubuntu/airflow/config
 
