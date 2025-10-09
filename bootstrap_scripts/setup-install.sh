@@ -19,21 +19,13 @@ chmod +x /usr/local/bin/docker-compose
 mkdir -p /home/ubuntu/airflow/dags /home/ubuntu/airflow/logs /home/ubuntu/airflow/plugins /home/ubuntu/airflow/config
 
 # Sync DAGs from S3 if they exist arn:aws:s3:::cloud-platform-airflow
-if aws s3 ls s3://cloud-platform-airflow/dags/ >/dev/null 2>&1; then
-  aws s3 sync s3://cloud-platform-airflow/dags/ /home/ubuntu/airflow/dags/
-<<<<<<< HEAD
-=======
-else
-  echo "# DAGs folder initialized" > /tmp/empty_dag_placeholder.txt
-  aws s3 cp /tmp/empty_dag_placeholder.txt s3://cloud-platform-airflow/dags/.keep
-  rm -f /tmp/empty_dag_placeholder.txt
->>>>>>> origin/main
-fi
+aws s3 ls s3://cloud-platform-airflow/dags/ >/dev/null 2>&1; then
+aws s3 sync s3://cloud-platform-airflow/dags/ /home/ubuntu/airflow/dags/
+
 
 # Copy requirements.txt from S3 if it exists
-if aws s3 ls s3://cloud-platform-airflow/requirements.txt >/dev/null 2>&1; then
-  aws s3 sync s3://cloud-platform-airflow/requirements.txt /home/ubuntu/airflow/requirements.txt
-fi
+aws s3 ls s3://cloud-platform-airflow/requirements.txt >/dev/null 2>&1; then
+aws s3 cp s3://cloud-platform-airflow/requirements.txt /home/ubuntu/airflow/requirements.txt
 
 # # Set permissions
 # chown -R ubuntu:ubuntu /home/ubuntu/airflow

@@ -26,31 +26,31 @@ locals {
     ]
   ])
 
-  # private_subnets = flatten([
-  #   for i, az in local.azs : [
-  #     {
-  #       name = "private-${i + 1}-a"
-  #       cidr = "10.0.${i + 30}.0/24"
-  #       az   = az
-  #     },
-  #     {
-  #       name = "private-${i + 1}-b"
-  #       cidr = "10.0.${i + 45}.0/24"
-  #       az   = az
-  #     },
-  #     {
-  #       name = "private-${i + 1}-c"
-  #       cidr = "10.0.${i + 65}.0/24"
-  #       az   = az
-  #     }
-  #   ]
-  # ])
+  private_subnets = flatten([
+    for i, az in local.azs : [
+      {
+        name = "private-${i + 1}-a"
+        cidr = "10.0.${i + 30}.0/24"
+        az   = az
+      },
+      {
+        name = "private-${i + 1}-b"
+        cidr = "10.0.${i + 45}.0/24"
+        az   = az
+      },
+      {
+        name = "private-${i + 1}-c"
+        cidr = "10.0.${i + 65}.0/24"
+        az   = az
+      }
+    ]
+  ])
 
   bucket = var.bucket
   name   = var.name
   # region              = var.region
-  # allowed_cidr_blocks = var.allowed_cidr_blocks
-  # key_name            = var.keypair
+  allowed_cidr_blocks = var.allowed_cidr_blocks
+  key_name            = var.keypair
 
   # Common tags to be applied to all resources
   common_tags = {
@@ -72,13 +72,13 @@ locals {
     Type = "Subnet"
   })
 
-  # ec2_tags = merge(local.common_tags, {
-  #   Type   = "Compute"
-  #   Backup = "false"
-  # })
+  ec2_tags = merge(local.common_tags, {
+    Type   = "Compute"
+    Backup = "false"
+  })
 
-  # rds_tags = merge(local.common_tags, {
-  #   Type = "Database"
-  # })
+  rds_tags = merge(local.common_tags, {
+    Type = "Database"
+  })
 
 }
