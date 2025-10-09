@@ -315,7 +315,7 @@ module "redshift_security_group" {
 
 module "redshift_role" {
   source       = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/iam_role/redshift_s3_role?ref=v1.4.4"
-  bucket_names = [module.etl_storage.cloud_beejan_bucket_name]
+  bucket_names = [data.aws_s3_bucket.etl_bucket.id]
   name         = "${local.name}-redshift-role"
   depends_on   = [module.random_password, module.random_username]
 }
