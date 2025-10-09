@@ -345,8 +345,7 @@ module "redshift" {
   multi_az                = true
   cluster_security_groups = [module.redshift_security_group.security_group_id]
   iam_role_redshift_arn   = [module.redshift_role.redshift_s3_role_arn]
-  subnet_ids              = [module.private_subnet.subnet_ids["private-1-b"], module.private_subnet.subnet_ids["private-2-b"]]
-  # , module.private_subnet.subnet_ids["private-3-b"]]
+  subnet_ids              = [module.private_subnet.subnet_ids["private-1-b"], module.private_subnet.subnet_ids["private-2-b"], module.private_subnet.subnet_ids["private-3-b"]]
   depends_on = [module.redshift_role, module.redshift_security_group]
   tags = merge(local.common_tags, {
     Name = "${local.name}-redshift-cluster"
