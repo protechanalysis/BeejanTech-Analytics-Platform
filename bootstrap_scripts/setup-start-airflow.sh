@@ -11,6 +11,10 @@ aws s3 cp s3://cloud-platform-airflow/docker-compose.yaml /home/ubuntu/airflow/d
 # Download the Docker Compose file from S3
 aws s3 cp s3://cloud-platform-airflow/Dockerfile /home/ubuntu/airflow/Dockerfile
 
+# Download the requirements.txt from S3
+aws s3 ls s3://cloud-platform-airflow/requirements.txt >/dev/null 2>&1; then
+aws s3 cp s3://cloud-platform-airflow/requirements.txt /home/ubuntu/airflow/requirements.txt
+
 
 # Set the Airflow UID
 echo -e "AIRFLOW_UID=$(id -u)" > .env
@@ -26,4 +30,4 @@ echo -e "AIRFLOW_UID=$(id -u)" > .env
 # Start all services in detached mode
 /usr/local/bin/docker-compose up -d
 
-echo "[$(date)] Airflow EC2 setup completed."
+# echo "[$(date)] Airflow EC2 setup completed."
