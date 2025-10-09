@@ -24,8 +24,8 @@ aws s3 sync s3://cloud-platform-airflow/dags/ /home/ubuntu/airflow/dags/
 
 
 # Copy requirements.txt from S3 if it exists
-iaws s3 ls s3://cloud-platform-airflow/requirements.txt >/dev/null 2>&1; then
-aws s3 sync s3://cloud-platform-airflow/requirements.txt /home/ubuntu/airflow/requirements.txt
+aws s3 ls s3://cloud-platform-airflow/requirements.txt >/dev/null 2>&1; then
+aws s3 cp s3://cloud-platform-airflow/requirements.txt /home/ubuntu/airflow/requirements.txt
 
 # # Set permissions
 # chown -R ubuntu:ubuntu /home/ubuntu/airflow
