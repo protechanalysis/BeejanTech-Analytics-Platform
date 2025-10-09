@@ -451,7 +451,7 @@ module "ssm_param_id" {
       type        = "String"
     },
     instance_2_id = {
-      description = "ec2 instance id"
+      description = "ec2 instance id 2"
       value       = module.ec2_instance_2.instance_id
       type        = "String"
     }
