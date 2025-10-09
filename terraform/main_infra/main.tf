@@ -265,12 +265,12 @@ module "ec2_instance_1" {
 # }
 
 module "load_balancer" {
-  source            = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/load_balancer/application/?ref=v1.3.4"
-  vpc_id            = module.vpc.vpc_id
-  name              = "${local.name}-alb"
-  alb_sg_id         = [module.alb_security_group.security_group_id]
-  subnet_ids        = [module.public_subnet.subnet_ids["public-1-b"], module.public_subnet.subnet_ids["public-2-b"]]
-  instance_ids      = { "instance_0" = module.ec2_instance_1.instance_id }
+  source       = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/load_balancer/application/?ref=v1.3.4"
+  vpc_id       = module.vpc.vpc_id
+  name         = "${local.name}-alb"
+  alb_sg_id    = [module.alb_security_group.security_group_id]
+  subnet_ids   = [module.public_subnet.subnet_ids["public-1-b"], module.public_subnet.subnet_ids["public-2-b"]]
+  instance_ids = { "instance_0" = module.ec2_instance_1.instance_id }
   #  "instance_1" = module.ec2_instance_2.instance_id }
   enable_stickiness = true
   cookie_duration   = 1800
