@@ -213,7 +213,7 @@ module "rds" {
   engine_version         = "16.4"
   parameter_group        = "default.postgres16"
   instance_class         = "db.m5.large"
-  multi_az               = true
+  multi_az               = false
   vpc_security_group_ids = [module.database_security_group.security_group_id]
   subnet_id              = [module.private_subnet.subnet_ids["private-1-a"], module.private_subnet.subnet_ids["private-2-a"]]
   depends_on             = [module.random_password, module.random_username]
@@ -248,29 +248,30 @@ module "ec2_instance_1" {
   })
 }
 
-module "ec2_instance_2" {
-  source                  = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/instance?ref=v1.2.5"
-  instance_type           = "t3a.xlarge"
-  vpc_id                  = module.vpc.vpc_id
-  subnet_id               = module.private_subnet.subnet_ids["private-2-a"]
-  instance_profile_name   = module.ec2_role.instance_profile_name
-  key_pair                = local.key_name
-  security_group_id       = [module.instance_security_group.security_group_id]
-  ssh_allowed_cidr_blocks = [local.allowed_cidr_blocks]
-  user_data               = file("../../bootstrap_scripts/setup-run.sh")
-  depends_on              = [module.ssm_param]
-  tags = merge(local.ec2_tags, {
-    Name = "${local.name}-instance-2"
-  })
-}
+# module "ec2_instance_2" {
+#   source                  = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/instance?ref=v1.2.5"
+#   instance_type           = "t3a.xlarge"
+#   vpc_id                  = module.vpc.vpc_id
+#   subnet_id               = module.private_subnet.subnet_ids["private-2-a"]
+#   instance_profile_name   = module.ec2_role.instance_profile_name
+#   key_pair                = local.key_name
+#   security_group_id       = [module.instance_security_group.security_group_id]
+#   ssh_allowed_cidr_blocks = [local.allowed_cidr_blocks]
+#   user_data               = file("../../bootstrap_scripts/setup-run.sh")
+#   depends_on              = [module.ssm_param]
+#   tags = merge(local.ec2_tags, {
+#     Name = "${local.name}-instance-2"
+#   })
+# }
 
 module "load_balancer" {
-  source            = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/load_balancer/application/?ref=v1.3.4"
-  vpc_id            = module.vpc.vpc_id
-  name              = "${local.name}-alb"
-  alb_sg_id         = [module.alb_security_group.security_group_id]
-  subnet_ids        = [module.public_subnet.subnet_ids["public-1-b"], module.public_subnet.subnet_ids["public-2-b"]]
-  instance_ids      = { "instance_0" = module.ec2_instance_1.instance_id, "instance_1" = module.ec2_instance_2.instance_id }
+  source       = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/load_balancer/application/?ref=v1.3.4"
+  vpc_id       = module.vpc.vpc_id
+  name         = "${local.name}-alb"
+  alb_sg_id    = [module.alb_security_group.security_group_id]
+  subnet_ids   = [module.public_subnet.subnet_ids["public-1-b"], module.public_subnet.subnet_ids["public-2-b"]]
+  instance_ids = { "instance_0" = module.ec2_instance_1.instance_id }
+  #  "instance_1" = module.ec2_instance_2.instance_id }
   enable_stickiness = true
   cookie_duration   = 1800
   health_check_path = "/api/v2/version"
@@ -340,9 +341,9 @@ module "redshift" {
   master_username         = data.aws_ssm_parameter.wh_username.value
   master_password         = data.aws_ssm_parameter.wh_password.value
   node                    = "ra3.large"
-  cluster                 = "multi-node"
-  number_of_nodes         = 2
-  multi_az                = true
+  cluster                 = "single-node"
+  number_of_nodes         = 1
+  multi_az                = false
   cluster_security_groups = [module.redshift_security_group.security_group_id]
   iam_role_redshift_arn   = [module.redshift_role.redshift_s3_role_arn]
   subnet_ids              = [module.private_subnet.subnet_ids["private-1-b"], module.private_subnet.subnet_ids["private-2-b"], module.private_subnet.subnet_ids["private-3-b"]]
@@ -390,9 +391,9 @@ module "redis" {
   engine               = "redis"
   engine_version       = "7.0"
   parameter_group_name = "default.redis7"
-  multi_az_enabled     = true
-  num_cache_clusters   = 2
-  failover             = true
+  multi_az_enabled     = false
+  num_cache_clusters   = 1
+  failover             = false
   subnet_ids           = [module.private_subnet.subnet_ids["private-1-a"], module.private_subnet.subnet_ids["private-2-a"]]
   security_group_ids   = [module.redis_security_group.security_group_id]
   tags = merge(local.common_tags, {
