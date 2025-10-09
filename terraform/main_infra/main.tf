@@ -241,7 +241,7 @@ module "ec2_instance_1" {
   security_group_id       = [module.instance_security_group.security_group_id]
   ssh_allowed_cidr_blocks = [local.allowed_cidr_blocks]
   assign_public_ip        = true
-  user_data               = file("../bootstrap_scripts/setup-run.sh")
+  user_data               = file("../../bootstrap_scripts/setup-run.sh")
   depends_on              = [module.ssm_param]
   tags = merge(local.ec2_tags, {
     Name = "${local.name}-instance-1"
