@@ -223,7 +223,7 @@ module "rds" {
 }
 
 module "ec2_role" {
-  source               = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/iam_role/ec2_ssm_s3_redshift/?ref=v1.4.5"
+  source               = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/iam_role/ec2_ssm_s3_redshift/?ref=v1.4.6"
   name                 = "${local.name}-ec2"
   bucket_names         = [data.aws_s3_bucket.etl_bucket.id, data.aws_s3_bucket.airflow_bucket.id]
   redshift_cluster_ids = [module.redshift.redshift_cluster_id]
@@ -438,6 +438,17 @@ module "ssm_param" {
     dwh_endpoint = {
       description = " datawarehouse endpoint"
       value       = split(":", module.redshift.redshift_cluster_endpoint)[0]
+      type        = "String"
+    }
+  }
+}
+
+module "ssm_param_id" {
+  source = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/ssm_parameters/general_param?ref=v1.3.1"
+  parameters = {
+    instance_1_id = {
+      description = "ec2 instance id"
+      value       = module.ec2_instance_1.instance_id
       type        = "String"
     }
   }
