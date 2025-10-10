@@ -8,8 +8,8 @@ def print_hello():
 
 # Define DAG
 with DAG(
-    dag_id="hello_5times",
-    start_date=datetime(2025, 10, 8),
+    dag_id="hello_times",
+    start_date=datetime(2025, 10, 9),
     schedule=None,   # Run only when triggered
     catchup=False,
     tags=["example"],
