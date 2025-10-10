@@ -38,7 +38,7 @@ jobs:
       - name: Sync DAGs to EC2 via SSM
         run: |
           aws ssm send-command \
-            --instance-ids "$INSTANCE_ID,$INSTANCE_2_ID" \
+            --instance-ids $INSTANCE_ID $INSTANCE_2_ID \
             --document-name "AWS-RunShellScript" \
             --comment "Sync DAGs from S3 to EC2" \
             --parameters commands="aws s3 sync s3://cloud-platform-airflow/dags/ /home/ubuntu/airflow/dags/" \
