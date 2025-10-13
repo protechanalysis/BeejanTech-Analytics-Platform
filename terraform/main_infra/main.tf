@@ -62,7 +62,7 @@ module "public_route_table" {
   vpc_id     = module.vpc.vpc_id
   name       = "public-rt"
   type       = "public"
-  route_cidr = local.allowed_cidr_blocks
+  route_cidr = "0.0.0.0/0"
   gateway_id = module.igw.igw_id
   subnet_ids = module.public_subnet.subnet_ids
   tags = merge(local.common_tags, {
@@ -76,7 +76,7 @@ module "private_route_table" {
   vpc_id     = module.vpc.vpc_id
   name       = "private-rt"
   type       = "private"
-  route_cidr = local.allowed_cidr_blocks
+  route_cidr = "0.0.0.0/0"
   nat_id     = module.nat_gateway.nat_id
   subnet_ids = module.private_subnet.subnet_ids
   tags = merge(local.common_tags, {
@@ -90,7 +90,6 @@ module "instance_security_group" {
   name        = "${local.name}-instance-sg"
   description = "Security group for EC2 instance"
   vpc_id      = module.vpc.vpc_id
-  # depends_on  = [module.alb_security_group]
 
   ingress_rules = [
     {
@@ -111,7 +110,7 @@ module "instance_security_group" {
       from_port   = 22
       to_port     = 22
       protocol    = "tcp"
-      cidr_blocks = [local.allowed_cidr_blocks]
+      cidr_blocks = ["10.0.0.0/16"]
       description = "Allow SSH access"
     }
   ]
@@ -121,8 +120,8 @@ module "instance_security_group" {
       from_port   = 0
       to_port     = 0
       protocol    = "-1"
-      cidr_blocks = ["0.0.0.0/0"] // Your VPC CIDR range
-      description = "Allow outbound to RDS"
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Allow all outbound traffic"
     }
   ]
 
@@ -144,7 +143,7 @@ module "database_security_group" {
       to_port                  = 5432
       protocol                 = "tcp"
       source_security_group_id = module.instance_security_group.security_group_id
-      description              = "Allow MySQL access from VPC"
+      description              = "Allow postgres access from ec2"
     }
   ]
   egress_rules = [
@@ -182,7 +181,7 @@ module "alb_security_group" {
       from_port   = 0
       to_port     = 0
       protocol    = "-1"
-      cidr_blocks = [local.allowed_cidr_blocks]
+      cidr_blocks = ["0.0.0.0/0"]
       description = "Allow all outbound traffic"
     }
   ]
@@ -205,7 +204,7 @@ module "random_username" {
 }
 
 module "rds" {
-  source                 = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/rds?ref=v1.3.5"
+  source                 = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/rds?ref=v1.5.0"
   database_name          = "analyticsdb"
   password               = module.random_password.result
   username               = module.random_username.result
@@ -213,9 +212,9 @@ module "rds" {
   engine_version         = "16.4"
   parameter_group        = "default.postgres16"
   instance_class         = "db.m5.large"
-  multi_az               = false
+  multi_az               = true
   vpc_security_group_ids = [module.database_security_group.security_group_id]
-  subnet_id              = [module.private_subnet.subnet_ids["private-1-a"], module.private_subnet.subnet_ids["private-2-a"]]
+  subnet_ids             = [module.private_subnet.subnet_ids["private-1-a"], module.private_subnet.subnet_ids["private-2-a"]]
   depends_on             = [module.random_password, module.random_username]
   tags = merge(local.rds_tags, {
     Name = "${local.name}-rds-instance"
@@ -231,44 +230,53 @@ module "ec2_role" {
   tags                 = local.ec2_tags
 }
 
+module "bastion_instance" {
+  source       = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/bastion?ref=v1.5.0"
+  vpc_id       = module.vpc.vpc_id
+  subnet_id    = module.public_subnet.subnet_ids["public-1-a"]
+  key_pair     = local.key_name
+  project_name = var.project_name
+  allowed_ip   = var.allowed_cidr_blocks
+  tags = merge(local.ec2_tags, {
+    Name = "${local.name}-bastion-instance"
+  })
+}
+
 module "ec2_instance_1" {
-  source                  = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/instance?ref=v1.2.5"
-  instance_type           = "t3a.xlarge"
-  vpc_id                  = module.vpc.vpc_id
-  subnet_id               = module.public_subnet.subnet_ids["public-1-a"]
-  instance_profile_name   = module.ec2_role.instance_profile_name
-  key_pair                = local.key_name
-  security_group_id       = [module.instance_security_group.security_group_id]
-  ssh_allowed_cidr_blocks = [local.allowed_cidr_blocks]
-  assign_public_ip        = true
-  user_data               = file("../../bootstrap_scripts/setup-run.sh")
-  depends_on              = [module.ssm_param]
+  source                = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/instance?ref=v1.5.0"
+  instance_type         = "t3a.xlarge"
+  vpc_id                = module.vpc.vpc_id
+  subnet_id             = module.private_subnet.subnet_ids["private-1-a"]
+  instance_profile_name = module.ec2_role.instance_profile_name
+  key_pair              = local.key_name
+  security_group_ids    = [module.instance_security_group.security_group_id]
+  user_data             = file("../../bootstrap_scripts/setup-run.sh")
+  depends_on            = [module.ssm_param]
   tags = merge(local.ec2_tags, {
     Name = "${local.name}-instance-1"
   })
 }
 
 module "ec2_instance_2" {
-  source                  = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/instance?ref=v1.2.5"
-  instance_type           = "t3a.xlarge"
-  vpc_id                  = module.vpc.vpc_id
-  subnet_id               = module.private_subnet.subnet_ids["private-2-a"]
-  instance_profile_name   = module.ec2_role.instance_profile_name
-  key_pair                = local.key_name
-  security_group_id       = [module.instance_security_group.security_group_id]
-  ssh_allowed_cidr_blocks = [local.allowed_cidr_blocks]
-  user_data               = file("../../bootstrap_scripts/setup-run.sh")
-  depends_on              = [module.ssm_param]
+  source                = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/instance?ref=v1.5.0"
+  instance_type         = "t3a.xlarge"
+  vpc_id                = module.vpc.vpc_id
+  subnet_id             = module.private_subnet.subnet_ids["private-2-a"]
+  instance_profile_name = module.ec2_role.instance_profile_name
+  key_pair              = local.key_name
+  security_group_ids    = [module.instance_security_group.security_group_id]
+  user_data             = file("../../bootstrap_scripts/setup-run.sh")
+  depends_on            = [module.ssm_param]
   tags = merge(local.ec2_tags, {
     Name = "${local.name}-instance-2"
   })
 }
 
 module "load_balancer" {
-  source            = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/load_balancer/application/?ref=v1.3.4"
+  source            = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/load_balancer/application/?ref=v1.5.0"
   vpc_id            = module.vpc.vpc_id
   name              = "${local.name}-alb"
-  alb_sg_id         = [module.alb_security_group.security_group_id]
+  alb_sg_ids        = [module.alb_security_group.security_group_id]
   subnet_ids        = [module.public_subnet.subnet_ids["public-1-b"], module.public_subnet.subnet_ids["public-2-b"]]
   instance_ids      = { "instance_0" = module.ec2_instance_1.instance_id, "instance_1" = module.ec2_instance_2.instance_id }
   enable_stickiness = true
@@ -303,7 +311,7 @@ module "redshift_security_group" {
       from_port   = 0
       to_port     = 0
       protocol    = "-1"
-      cidr_blocks = [local.allowed_cidr_blocks]
+      cidr_blocks = ["0.0.0.0/0"]
       description = "Allow all outbound traffic"
     }
   ]
@@ -384,7 +392,7 @@ module "redis_security_group" {
 }
 
 module "redis" {
-  source               = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/elasticache/replication_group/cluster_diasable?ref=v1.3.0"
+  source               = "git::https://github.com/protechanalysis/terraform-aws-module.git//aws_modules/elasticache/replication_group/cluster_disable?ref=v1.5.0"
   cluster_id           = "${local.name}-elasticache"
   cache_node_type      = "cache.t3.micro"
   engine               = "redis"
