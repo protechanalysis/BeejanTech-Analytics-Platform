@@ -21,12 +21,12 @@ variable "allowed_cidr_blocks" {
 variable "environment" {
   description = "Environment name (e.g., dev, staging, prod)"
   type        = string
-  default     = "dev"
+  default     = "prod"
 }
 
 variable "project_name" {
   description = "Name of the project"
   type        = string
-  default     = "vpc-ec2-rds"
+  default     = "Beejan_Cloud_Project"
 }
 
