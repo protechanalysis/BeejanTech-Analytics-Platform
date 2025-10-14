@@ -27,7 +27,36 @@ jobs:
         run: |
           aws s3 sync orchestration/dags/ s3://cloud-platform-airflow/dags/
 
-      - name: Get EC2 instance ID from SSM Parameter
+          echo "Verifying upload..."
+          local_file_count=$(find orchestration/dags -type f | wc -l)
+          s3_file_count=$(aws s3 ls s3://cloud-platform-airflow/dags/ --recursive | wc -l)
+
+          echo "Local file count: $local_file_count"
+          echo "Remote file count: $s3_file_count"
+
+          if [ "$s3_file_count" -ge "$local_file_count" ]; then
+            echo "Upload verified successfully — files are in S3."
+          else
+            echo "Upload verification failed — not all files are in S3."
+            exit 1
+          fi
+
+  Deploy-to-EC2:
+    runs-on: ubuntu-latest
+    environment: production
+    needs: Upload-to-S3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Get EC2 instance IDs from SSM Parameters
         id: get_instance_id
         run: |
           INSTANCE_ID=$(aws ssm get-parameter --name "instance_1_id" --query "Parameter.Value" --output text)
@@ -35,11 +64,77 @@ jobs:
           INSTANCE_2_ID=$(aws ssm get-parameter --name "instance_2_id" --query "Parameter.Value" --output text)
           echo "INSTANCE_2_ID=$INSTANCE_2_ID" >> $GITHUB_ENV
 
+      # Sync DAGs
       - name: Sync DAGs to EC2 via SSM
+        id: sync_dags
         run: |
+          echo " Syncing DAGs from S3 to EC2..."
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids $INSTANCE_ID $INSTANCE_2_ID \
+            --document-name "AWS-RunShellScript" \
+            --comment "Sync DAGs from S3" \
+            --parameters '{"commands":[
+              "aws s3 sync s3://cloud-platform-airflow/dags/ /home/ubuntu/airflow/dags/ --delete",
+              "chown -R ubuntu:ubuntu /home/ubuntu/airflow/dags/"
+            ]}' \
+            --timeout-seconds 600 \
+            --query "Command.CommandId" \
+            --output text)
+          echo "COMMAND_ID=$COMMAND_ID" >> $GITHUB_ENV
+
+          for i in {1..5}; do
+            STATUS=$(aws ssm list-command-invocations \
+              --command-id "$COMMAND_ID" \
+              --query "CommandInvocations[].Status" \
+              --output text)
+            echo "Attempt $i - Status: $STATUS"
+
+            if [[ "$STATUS" == "Success" ]]; then
+              echo "DAG sync succeeded!"
+              exit 0
+            elif [[ "$STATUS" == "Failed" || "$STATUS" == "TimedOut" || "$STATUS" == "Cancelled" ]]; then
+              echo "DAG sync failed with status: $STATUS"
+              exit 1
+            fi
+            sleep 5
+          done
+
+          echo "Timed out waiting for DAG sync to complete."
+          exit 1
+
+      # Restart Airflow containers (only if sync succeeded)
+      - name: Restart Airflow Docker Containers
+        if: success()
+        run: |
+          echo "Restarting Airflow containers..."
           aws ssm send-command \
             --instance-ids $INSTANCE_ID $INSTANCE_2_ID \
             --document-name "AWS-RunShellScript" \
-            --comment "Sync DAGs from S3 to EC2" \
-            --parameters commands="aws s3 sync s3://cloud-platform-airflow/dags/ /home/ubuntu/airflow/dags/" \
-            --timeout-seconds 600
+            --comment "Restart Airflow Docker containers" \
+            --parameters '{"commands":[
+              "cd /home/ubuntu/airflow && sudo docker-compose restart"
+            ]}' \
+            --timeout-seconds 300
+          echo "Airflow restart command sent successfully."
+
+      # Wait for containers to stabilize before health check
+      - name: Wait for Airflow to initialize
+        if: success()
+        run: |
+          echo "Waiting 3 minutes for Airflow containers to fully initialize..."
+          sleep 180
+
+      # Health check after restart
+      - name: Airflow Health Check
+        if: success()
+        run: |
+          echo " Checking Airflow health..."
+          aws ssm send-command \
+            --instance-ids $INSTANCE_ID $INSTANCE_2_ID \
+            --document-name "AWS-RunShellScript" \
+            --comment "Check Airflow Health" \
+            --parameters '{"commands":[
+              "curl -f http://localhost:8080/api/v2/version || (echo Airflow health check failed && exit 1)"
+            ]}' \
+            --timeout-seconds 120
+          echo "Airflow is healthy."
