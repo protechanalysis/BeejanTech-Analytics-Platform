@@ -3,12 +3,12 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 
 def print_hello():
-    for i in range(1, 60):  # Loop from 1 to 60
+    for i in range(1, 20):  # Loop from 1 to 20
         print(f"Hello {i}")
 
 # Define DAG
 with DAG(
-    dag_id="hello_times",
+    dag_id="hello_times_20",
     start_date=datetime(2025, 10, 9),
     schedule=None,   # Run only when triggered
     catchup=False,
