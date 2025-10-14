@@ -3,7 +3,7 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 
 def print_hello():
-    for i in range(1, 56):  # Loop from 1 to 50
+    for i in range(1, 60):  # Loop from 1 to 60
         print(f"Hello {i}")
 
 # Define DAG
