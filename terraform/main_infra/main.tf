@@ -348,9 +348,9 @@ module "redshift" {
   master_username         = data.aws_ssm_parameter.wh_username.value
   master_password         = data.aws_ssm_parameter.wh_password.value
   node                    = "ra3.large"
-  cluster                 = "single-node"
-  number_of_nodes         = 1
-  multi_az                = false
+  cluster                 = "multi-node"
+  number_of_nodes         = 2
+  multi_az                = true
   cluster_security_groups = [module.redshift_security_group.security_group_id]
   iam_role_redshift_arn   = [module.redshift_role.redshift_s3_role_arn]
   subnet_ids              = [module.private_subnet.subnet_ids["private-1-b"], module.private_subnet.subnet_ids["private-2-b"], module.private_subnet.subnet_ids["private-3-b"]]
@@ -398,9 +398,9 @@ module "redis" {
   engine               = "redis"
   engine_version       = "7.0"
   parameter_group_name = "default.redis7"
-  multi_az_enabled     = false
-  num_cache_clusters   = 1
-  failover             = false
+  multi_az_enabled     = true
+  num_cache_clusters   = 2
+  failover             = true
   subnet_ids           = [module.private_subnet.subnet_ids["private-1-a"], module.private_subnet.subnet_ids["private-2-a"]]
   security_group_ids   = [module.redis_security_group.security_group_id]
   tags = merge(local.common_tags, {
