@@ -8,6 +8,7 @@ from config.set_variable import num_trans
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
+
 def generate_transaction(execution_datetime: datetime) -> pd.DataFrame:
     """
     Generate fake book purchase transactions for ALL books retrieved.

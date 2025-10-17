@@ -135,3 +135,4 @@ with DAG(
     trans >> validate_transactions >> schema_stg >> stage_trans
     stage_trans >> trunc_stage_trans >> copy_stage_trans >> transactions_table_dwh >> merge_trans
     
+

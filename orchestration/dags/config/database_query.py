@@ -6,6 +6,7 @@ from config.set_variable import postgres_conn_id
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
+
 def create_books_table():
     """
     Create the books table and indexes if they do not exist using Airflow's PostgresHook.

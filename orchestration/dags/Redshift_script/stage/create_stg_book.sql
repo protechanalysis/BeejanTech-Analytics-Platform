@@ -8,3 +8,4 @@ CREATE TABLE IF NOT EXISTS staging.books_stage (
     publication_year BIGINT,
     pages BIGINT
 );
+

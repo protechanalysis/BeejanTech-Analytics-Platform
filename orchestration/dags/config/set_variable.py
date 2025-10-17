@@ -19,7 +19,6 @@ book_type={
     "price": "decimal(10,2)"
 }
 
-
 trans_type={
     "transaction_id": "string",
     "book_id": "string",

@@ -8,6 +8,7 @@ from pandera.pandas import Column, DataFrameSchema, Check
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
+
 schema = DataFrameSchema({
     "transaction_id": Column(str),
     "book_id": Column(str),

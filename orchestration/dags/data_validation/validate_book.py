@@ -8,6 +8,7 @@ from typing import Tuple
 
 current_year = datetime.now().year
 
+
 def _is_valid_uuid(x: str) -> bool:
     try:
         uuid.UUID(x)

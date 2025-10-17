@@ -32,5 +32,6 @@ else
     echo "No DAGs found in s3://cloud-platform-airflow/dags/"
 fi
 
+
 # # Set permissions
 # chown -R ubuntu:ubuntu /home/ubuntu/airflow

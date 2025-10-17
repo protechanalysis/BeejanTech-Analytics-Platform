@@ -16,11 +16,11 @@ Primary requirements:
 - Operational readiness: monitoring, testing, and CI/CD
 
 ## Architecture
-![architecture](assests/redshift_vpc-main%20diagram.jpg)
+![architecture](assests/redshift_vpc_main_diagram.jpg)
 
 ------
 ## ETL Overview
-![etl](assests/redshift_vpc-flow.png)
+![etl](assests/redshift_vpc_flow.png)
 
 ## Codebase structure
 

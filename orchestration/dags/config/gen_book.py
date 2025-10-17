@@ -9,6 +9,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 
 fake = Faker()
 
+
 def generate_books(num_books):
     """
     Generate a list of fake books with realistic data.

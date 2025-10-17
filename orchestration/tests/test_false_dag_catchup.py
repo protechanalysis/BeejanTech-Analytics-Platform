@@ -12,3 +12,4 @@ def test_false_dag_catchup():
         assert (
             dag.catchup is False
         ), f"DAG {dag_id} has catchup=True (expected False)"
+        

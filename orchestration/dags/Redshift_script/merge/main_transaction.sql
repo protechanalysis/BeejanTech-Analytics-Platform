@@ -10,3 +10,4 @@ WHEN MATCHED THEN
 WHEN NOT MATCHED THEN
     INSERT (transaction_id, book_id, quantity, total_price, customer_name, transaction_date)
     VALUES (st.transaction_id, st.book_id, st.quantity, st.total_price, st.customer_name, st.transaction_date);
+

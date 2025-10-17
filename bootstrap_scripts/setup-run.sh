@@ -37,3 +37,4 @@ echo "[$(date)] Uploading log to S3: ${S3_LOG_PATH}"
 aws s3 cp "$LOG_FILE" "$S3_LOG_PATH"
 
 echo "[$(date)] Log uploaded successfully."
+

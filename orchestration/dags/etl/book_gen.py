@@ -6,6 +6,7 @@ from config.set_variable import num_books
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
+
 def book_ingest() -> None:
     """
     Generate and insert books into the database.

@@ -35,3 +35,4 @@ try:
     put_ssm_param("secret_key", secret_key)
 except Exception as e:
     logging.error("Failed to store one or more secrets in SSM.")
+

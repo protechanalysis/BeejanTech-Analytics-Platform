@@ -20,3 +20,4 @@ def test_dags_contains_tasks():
 
     # assert after getting all empty dags
     assert not empty_dags, f"These DAGs have no tasks: {empty_dags}"
+    

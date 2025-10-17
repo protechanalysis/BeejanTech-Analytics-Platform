@@ -13,3 +13,4 @@ WHEN MATCHED THEN
 WHEN NOT MATCHED THEN
     INSERT (book_id, title, author, genre, price, isbn, publication_year, pages)
     VALUES (s.book_id, s.title, s.author, s.genre, s.price, s.isbn, s.publication_year, s.pages);
+

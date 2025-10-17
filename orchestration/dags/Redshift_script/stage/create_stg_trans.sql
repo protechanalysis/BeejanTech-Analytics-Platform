@@ -6,3 +6,4 @@ CREATE TABLE IF NOT EXISTS staging.transactions_stage (
     customer_name VARCHAR(200),
     transaction_date TIMESTAMP
 );
+

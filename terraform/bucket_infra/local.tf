@@ -15,3 +15,4 @@ locals {
     Type = "Storage"
   })
 }
+

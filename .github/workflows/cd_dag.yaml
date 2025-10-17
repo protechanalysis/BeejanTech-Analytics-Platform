@@ -150,3 +150,4 @@ jobs:
             ]}' \
             --timeout-seconds 120
           echo "Airflow is healthy."
+

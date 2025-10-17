@@ -22,3 +22,4 @@ def test_dag_has_start_date():
     assert (
         not dag_without_start_date
     ), "These DAGs have no start_date:\n" + "\n".join(dag_without_start_date)
+    
