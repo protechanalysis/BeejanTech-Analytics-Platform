@@ -1,0 +1,128 @@
+name: CD_Terraform_Deployment
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
+
+jobs:
+  terraform-bucket-infra:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    # Configure AWS credential
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.13.3"
+
+      - name: Terraform Init
+        run: terraform init -input=false
+        working-directory: ./terraform/bucket_infra
+        continue-on-error: false
+
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+        working-directory: ./terraform/bucket_infra
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -out=tfplan
+        working-directory: ./terraform/bucket_infra
+        continue-on-error: false
+
+      - name: Terraform Apply
+        run: terraform apply -input=false -auto-approve ./tfplan
+        working-directory: ./terraform/bucket_infra
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        continue-on-error: false
+
+  Upload-to-S3:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'    
+    needs: terraform-bucket-infra
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload bootstraps folder to S3
+        run: |
+          aws s3 sync bootstrap_scripts/ s3://cloud-platform-airflow/bootstrap_scripts --exclude "setup-run.sh"
+        continue-on-error: false
+      
+      - name: Upload orchestration folder to S3
+        run: |
+          aws s3 sync orchestration/ s3://cloud-platform-airflow/ --exclude "tests/*"
+        continue-on-error: false
+
+
+  terraform-main-apply:
+    needs: Upload-to-S3
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      # Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+        
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: pip install -r key_requirements.txt
+
+      - name: Generate and store secrets in AWS SSM
+        run: python secret.py
+        continue-on-error: false
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.13.3"
+
+      - name: Terraform Init
+        run: terraform init -input=false
+        working-directory: ./terraform/main_infra
+        continue-on-error: false
+
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -out=tfplan
+        working-directory: ./terraform/main_infra
+        continue-on-error: false
+
+      - name: Terraform Apply
+        run: terraform apply -input=false -auto-approve ./tfplan
+        working-directory: ./terraform/main_infra
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        
+  
